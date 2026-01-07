@@ -3,7 +3,6 @@ local dashboard = require("config.dashboard")
 return {
 	{ "nvim-lua/plenary.nvim" },
 
-	-- The New King of Completion: Blink.cmp
 	{
 		"saghen/blink.cmp",
 		version = "*", -- use a release tag to download pre-built binaries
@@ -71,5 +70,5 @@ return {
 		},
 	},
 
-	{ "tpope/vim-surround" },
+	{ "lewis6991/gitsigns.nvim" },
 }

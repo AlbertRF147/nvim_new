@@ -64,17 +64,17 @@ return {
 
 					-- Inlay Hints (A professional must-have)
 					if client and client.supports_method("textDocument/inlayHint") then
-            local toggle_inline_hint = function()
-              local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf })
-              local to_value = not enabled
-              vim.lsp.inlay_hint.enable(to_value, { bufnr = args.buf })
-              if to_value then
-                vim.notify("Inline Hints Enabled")
-              else
-                vim.notify("Inline Hints Disabled")
-              end
-            end
-            vim.keymap.set("n", "<leader>ti", toggle_inline_hint, { desc = "Toggle Inline Hints" })
+						local toggle_inline_hint = function()
+							local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf })
+							local to_value = not enabled
+							vim.lsp.inlay_hint.enable(to_value, { bufnr = args.buf })
+							if to_value then
+								vim.notify("Inline Hints Enabled")
+							else
+								vim.notify("Inline Hints Disabled")
+							end
+						end
+						vim.keymap.set("n", "<leader>ti", toggle_inline_hint, { desc = "Toggle Inline Hints" })
 					end
 				end,
 			})
@@ -110,6 +110,35 @@ return {
 				-- markdown = { "-" },
 			},
 			-- format_on_save = nil, -- Explicitly disabled
+		},
+	},
+
+	{
+		"folke/lazydev.nvim",
+		ft = "lua", -- only load on lua files
+		opts = {
+			library = {
+				-- See the configuration section for more details
+				-- Load luvit types when the `vim.uv` word is found
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
+	},
+	{ -- optional blink completion source for require statements and module annotations
+		"saghen/blink.cmp",
+		opts = {
+			sources = {
+				-- add lazydev to your completion providers
+				default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+				providers = {
+					lazydev = {
+						name = "LazyDev",
+						module = "lazydev.integrations.blink",
+						-- make lazydev completions top priority (see `:h blink.cmp`)
+						score_offset = 100,
+					},
+				},
+			},
 		},
 	},
 }
