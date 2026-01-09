@@ -53,7 +53,7 @@ return {
 					)
 
 					-- Actions
-					vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs", buffer = args.buf })
+					-- vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs", buffer = args.buf })
 					vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename", buffer = args.buf })
 					vim.keymap.set(
 						{ "n", "v" },

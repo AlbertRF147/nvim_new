@@ -64,10 +64,10 @@ return {
 		end,
 	},
 
-	{
-		"nvim-treesitter/nvim-treesitter-textobjects",
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
-	},
+	-- {
+	-- 	"nvim-treesitter/nvim-treesitter-textobjects",
+	-- 	dependencies = { "nvim-treesitter/nvim-treesitter" },
+	-- },
 
 	{
 		"MagicDuck/grug-far.nvim",
