@@ -21,9 +21,9 @@ vim.g.which_key_timeout = 500
 opt.nu = true
 -- opt.relativenumber = true
 
-opt.tabstop = 2
-opt.softtabstop = 2
-opt.shiftwidth = 2
+opt.tabstop = 4
+opt.softtabstop = 4
+opt.shiftwidth = 0
 opt.expandtab = true
 
 opt.autoread = true
@@ -54,9 +54,9 @@ opt.colorcolumn = "80"
 opt.cursorline = true
 
 vim.filetype.add({
-  extension = {
-    ejs = 'embedded_template'
-  }
+	extension = {
+		ejs = "embedded_template",
+	},
 })
 
 -- Disable providers we don't use
@@ -69,11 +69,8 @@ vim.g.loaded_ruby_provider = 0
 -- Supress deprecation warning from lspconfig
 local notify = vim.notify
 vim.notify = function(msg, level, opts)
-  if msg:match("require%('lspconfig'%)") then
-    return
-  end
-  notify(msg, level, opts)
+	if msg:match("require%('lspconfig'%)") then
+		return
+	end
+	notify(msg, level, opts)
 end
-
--- If a colorscheme forces its own guicursor, re-apply this afterwards.
-

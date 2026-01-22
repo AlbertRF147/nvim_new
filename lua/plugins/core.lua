@@ -3,31 +3,16 @@ local dashboard = require("config.dashboard")
 return {
 	{ "nvim-lua/plenary.nvim" },
 
-	{
-		"saghen/blink.cmp",
-		version = "*", -- use a release tag to download pre-built binaries
-		opts = {
-			keymap = {
-				preset = "default",
-				["<Up>"] = { "select_prev", "fallback" },
-				["<Down>"] = { "select_next", "fallback" },
-				["<Right>"] = { "select_and_accept", "fallback" },
-			},
-			appearance = {
-				use_nvim_cmp_as_default = true,
-				nerd_font_variant = "mono",
-			},
-			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
-			},
-		},
-	},
-
 	-- Colorscheme (Modern and Professional)
 	{
 		"catppuccin/nvim",
 		name = "catppuccin",
 		priority = 1000,
+		opts = {
+			blink_cmp = {
+				style = "bordered",
+			},
+		},
 		config = function()
 			vim.cmd.colorscheme("catppuccin-mocha")
 		end,
@@ -71,4 +56,56 @@ return {
 	},
 
 	{ "lewis6991/gitsigns.nvim" },
+
+	{
+		"sindrets/diffview.nvim",
+		config = function()
+			require("diffview").setup({
+				view = {
+					default = {
+						layout = "diff2_vertical",
+					},
+				},
+			})
+		end,
+		keys = {
+			{
+				"<leader>dc",
+				function()
+					vim.cmd("DiffviewClose")
+				end,
+				{ desc = { "Close Diffview " } },
+			},
+			{
+				"<leader>dh",
+				function()
+					Snacks.picker.git_log({
+						layout = {
+							hidden = { "preview" },
+							layout = {
+								backdrop = false,
+								width = 0.9,
+								min_width = 150,
+								max_width = 200,
+								height = 0.4,
+								min_height = 2,
+								box = "vertical",
+								border = true,
+								title = "{title}",
+								title_pos = "center",
+								{ win = "input", height = 1, border = "bottom" },
+								{ win = "list", border = "none" },
+								{ win = "preview", title = "{preview}", height = 0.4, border = "top" },
+							},
+						},
+						confirm = function(picker, item)
+							picker:close()
+							vim.cmd("DiffviewOpen " .. item.commit .. "^!")
+						end,
+					})
+				end,
+				desc = "Git Log (DiffView)",
+			},
+		},
+	},
 }

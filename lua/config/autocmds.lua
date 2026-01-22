@@ -2,7 +2,7 @@ local api = vim.api
 
 api.nvim_create_autocmd(
 	"FileType",
-	{ pattern = { "help", "startuptime", "qf", "lspinfo" }, command = [[nnoremap <buffer><silent> q :close<CR>]] }
+	{ pattern = { "help", "startuptime", "qf", "lspinfo", "codecompanion" }, command = [[nnoremap <buffer><silent> q :close<CR>]] }
 )
 
 api.nvim_create_autocmd("BufWinEnter", {

@@ -1,4 +1,10 @@
 return {
+	-- TS LSP replacement for ts_ls
+	{
+		"pmizio/typescript-tools.nvim",
+		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		opts = {},
+	},
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -6,7 +12,7 @@ return {
 			{
 				"williamboman/mason-lspconfig.nvim",
 				opts = {
-					ensure_installed = { "lua_ls", "ts_ls", "pyright", "ruff" },
+					ensure_installed = { "lua_ls", "basedpyright", "ruff" },
 				},
 			},
 			"saghen/blink.cmp",
@@ -26,6 +32,14 @@ return {
 					Lua = {
 						diagnostics = { globals = { "vim" } },
 						completion = { callSnippet = "Replace" },
+					},
+				},
+			})
+
+			vim.lsp.config("tailwindcss", {
+				settings = {
+					tailwindCSS = {
+						colorDecorators = false,
 					},
 				},
 			})
@@ -60,6 +74,24 @@ return {
 						"<leader>ca",
 						vim.lsp.buf.code_action,
 						{ desc = "Code Action", buffer = args.buf }
+					)
+					vim.keymap.set(
+						"n",
+						"<leader>rui",
+						"<cmd>TSToolsRemoveUnusedImports<cr>",
+						{ desc = "Remove unused imports" }
+					)
+					vim.keymap.set(
+						"n",
+						"<leader>ai",
+						"<cmd>TSToolsAddMissingImports<cr>",
+						{ desc = "Remove unused imports" }
+					)
+					vim.keymap.set(
+						"n",
+						"<leader>rn",
+						"<cmd>TSToolsRenameFile<cr>",
+						{ desc = "Remove unused imports" }
 					)
 
 					-- Inlay Hints (A professional must-have)

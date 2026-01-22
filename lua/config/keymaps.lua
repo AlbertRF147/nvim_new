@@ -14,10 +14,10 @@ map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 map("n", "J", "mzJ`z", { desc = "Join lines steady cursor" })
 
 -- Center view on scroll/search
-map("n", "<C-d>", "<C-d>zz")
-map("n", "<C-u>", "<C-u>zz")
-map("n", "n", "nzzzv")
-map("n", "N", "Nzzzv")
+-- map("n", "<C-d>", "<C-d>zz")
+-- map("n", "<C-u>", "<C-u>zz")
+-- map("n", "n", "nzzzv")
+-- map("n", "N", "Nzzzv")
 
 -- Clipboard Management
 map("x", "p", [["_dP]], { desc = "Paste without overwriting register" })
