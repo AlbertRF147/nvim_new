@@ -119,28 +119,28 @@ return {
 		},
 	},
 
-	{
-		"karb94/neoscroll.nvim",
-		config = function()
-			local ns = require("neoscroll")
-			ns.setup({
-				duration_multiplier = 1.0,
-				post_hook = function(info)
-					vim.cmd("normal! zz")
-				end,
-			})
-			local keymap = {
-				["<C-u>"] = function()
-					ns.ctrl_u({ duration = 80, info = { "center_me" } })
-				end,
-				["<C-d>"] = function()
-					ns.ctrl_d({ duration = 80, info = { "center_me" } })
-				end,
-			}
-			local modes = { "n", "v", "x" }
-			for key, func in pairs(keymap) do
-				vim.keymap.set(modes, key, func)
-			end
-		end,
-	},
+	-- {
+	-- 	"karb94/neoscroll.nvim",
+	-- 	config = function()
+	-- 		local ns = require("neoscroll")
+	-- 		ns.setup({
+	-- 			duration_multiplier = 1.0,
+	-- 			post_hook = function(info)
+	-- 				vim.cmd("normal! zz")
+	-- 			end,
+	-- 		})
+	-- 		local keymap = {
+	-- 			["<C-u>"] = function()
+	-- 				ns.ctrl_u({ duration = 80, info = { "center_me" } })
+	-- 			end,
+	-- 			["<C-d>"] = function()
+	-- 				ns.ctrl_d({ duration = 80, info = { "center_me" } })
+	-- 			end,
+	-- 		}
+	-- 		local modes = { "n", "v", "x" }
+	-- 		for key, func in pairs(keymap) do
+	-- 			vim.keymap.set(modes, key, func)
+	-- 		end
+	-- 	end,
+	-- },
 }

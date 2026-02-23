@@ -12,21 +12,23 @@ return {
 		config = function()
 			require("nvim-ts-autotag").setup({
 				opts = {
-					-- Defaults
 					enable_close = true, -- Auto close tags
 					enable_rename = true, -- Auto rename pairs of tags
 					enable_close_on_slash = true, -- Auto close on trailing </
+					-- update_on_insert = true, -- Update tags in insert mode
 				},
-				-- Also override individual filetype configs, these take priority.
-				-- Empty by default, useful if one of the "opts" global settings
-				-- doesn't work well in a specific filetype
 				per_filetype = {
 					-- ["html"] = {
 					-- 	enable_close = false,
 					-- },
 				},
+				aliases = {
+					["javascriptreact"] = "html",
+					["typescriptreact"] = "html",
+				},
 			})
 		end,
+		event = { "BufReadPre", "BufNewFile" },
 	},
 
 	{ "tpope/vim-surround" },
@@ -83,6 +85,7 @@ return {
 					"c_sharp",
 					"markdown",
 					"markdown_inline",
+                    "sql",
 				},
 			})
 		end,
@@ -98,6 +101,7 @@ return {
 		config = function()
 			require("grug-far").setup({})
 		end,
+		lazy = false,
 		keys = {
 			{
 				"<leader>S",
@@ -117,6 +121,51 @@ return {
 			hc.setup({
 				enable_tailwind = true,
 				render = "virtual",
+			})
+		end,
+	},
+
+	{
+		"stevearc/conform.nvim",
+		-- No need for "event = 'BufWritePre'" if we aren't formatting on save!
+		-- This makes your startup even faster.
+		cmd = { "ConformInfo" },
+		keys = {
+			{
+				"<leader>bf", -- "Buffer Format"
+				function()
+					require("conform").format({
+						async = true,
+						lsp_format = "fallback",
+					})
+				end,
+				mode = { "n", "v" }, -- Works in Normal and Visual mode
+				desc = "Format buffer (or selection)",
+			},
+		},
+		config = function(_, opts)
+			require("conform").setup({
+				formatters_by_ft = {
+					lua = { "stylua" },
+					python = { "ruff_format" },
+					javascript = { "prettierd", "prettier", stop_after_first = true },
+					typescript = { "prettierd", "prettier", stop_after_first = true },
+					typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+					yaml = { "yamlfix" },
+					json = { "prettierd", "prettier", stop_after_first = true },
+					css = { "prettierd", "prettier", stop_after_first = true },
+                    sql = { "pg_format" },
+					-- Use "-" to disable formatting for specific filetypes
+					-- markdown = { "-" },
+				},
+				formatters = {
+					yamlfix = {
+						env = {
+							YAMLFIX_LINE_LENGTH = "65",
+							YAMLFIX_COMMENTS_REQUIRE_STARTING_SPACE = "true",
+						},
+					},
+				},
 			})
 		end,
 	},

@@ -1,24 +1,30 @@
 return {
-	-- TS LSP replacement for ts_ls
-	{
-		"pmizio/typescript-tools.nvim",
-		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-		opts = {},
-	},
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
-			{ "williamboman/mason.nvim", opts = {} },
+			{
+				"williamboman/mason.nvim",
+				opts = {},
+				config = function()
+					require("mason").setup({
+						registries = {
+							"github:mason-org/mason-registry",
+							"github:Crashdummyy/mason-registry",
+						},
+					})
+				end,
+			},
 			{
 				"williamboman/mason-lspconfig.nvim",
 				opts = {
-					ensure_installed = { "lua_ls", "basedpyright", "ruff" },
+					ensure_installed = { "lua_ls", "basedpyright", "ruff", "postgres_lsp" },
 				},
 			},
 			"saghen/blink.cmp",
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
+			local util = require("lspconfig.util")
 			local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 			-- Neovim 0.11 Native Enable
@@ -26,7 +32,26 @@ return {
 			-- for servers installed via Mason.
 
 			-- Customizing specific servers (The Modern Way)
-			-- You no longer use .setup({}). You use vim.lsp.config()
+
+			-- Deno LSP won't attach using the native lsp
+			-- lspconfig.denols.setup({
+			-- 	capabilities = capabilities,
+			-- 	root_dir = util.root_pattern("deno.json", "deno.jsonc"),
+			-- 	single_file_support = false,
+			-- })
+
+			vim.lsp.config("postgres_lsp", {
+				filetypes = { "sql", "pgsql" },
+				single_file_support = true,
+				root_markers = { "supabase" },
+				workspace_required = false,
+			})
+			vim.lsp.enable("postgres_lsp")
+
+			vim.lsp.config("ts_ls", {
+				root_markers = { "package.json" },
+			})
+
 			vim.lsp.config("lua_ls", {
 				settings = {
 					Lua = {
@@ -87,12 +112,7 @@ return {
 						"<cmd>TSToolsAddMissingImports<cr>",
 						{ desc = "Remove unused imports" }
 					)
-					vim.keymap.set(
-						"n",
-						"<leader>rn",
-						"<cmd>TSToolsRenameFile<cr>",
-						{ desc = "Remove unused imports" }
-					)
+					vim.keymap.set("n", "<leader>rn", "<cmd>TSToolsRenameFile<cr>", { desc = "Remove unused imports" })
 
 					-- Inlay Hints (A professional must-have)
 					if client and client.supports_method("textDocument/inlayHint") then
@@ -111,38 +131,6 @@ return {
 				end,
 			})
 		end,
-	},
-
-	-- Professional Auto-formatting
-	{
-		"stevearc/conform.nvim",
-		-- No need for "event = 'BufWritePre'" if we aren't formatting on save!
-		-- This makes your startup even faster.
-		cmd = { "ConformInfo" },
-		keys = {
-			{
-				"<leader>bf", -- "Buffer Format"
-				function()
-					require("conform").format({
-						async = true,
-						lsp_format = "fallback",
-					})
-				end,
-				mode = { "n", "v" }, -- Works in Normal and Visual mode
-				desc = "Format buffer (or selection)",
-			},
-		},
-		opts = {
-			formatters_by_ft = {
-				lua = { "stylua" },
-				python = { "ruff_format" },
-				javascript = { "prettierd", "prettier", stop_after_first = true },
-				typescript = { "prettierd", "prettier", stop_after_first = true },
-				-- Use "-" to disable formatting for specific filetypes
-				-- markdown = { "-" },
-			},
-			-- format_on_save = nil, -- Explicitly disabled
-		},
 	},
 
 	{
@@ -172,5 +160,27 @@ return {
 				},
 			},
 		},
+	},
+
+	-- TS LSP replacement for ts_ls
+	{
+		"pmizio/typescript-tools.nvim",
+		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		opts = {},
+		config = function()
+			require("typescript-tools").setup({
+				settings = {
+					jsx_close_tag = {
+						enable = true,
+						filetypes = { "javascriptreact", "typescriptreact" },
+					},
+				},
+			})
+		end,
+	},
+
+	{
+		"seblyng/roslyn.nvim",
+		opts = {},
 	},
 }
