@@ -29,3 +29,13 @@ map("n", "<leader>s", "<cmd>w<CR>", { desc = "Save" })
 map("n", "<leader>ss", "<cmd>so<CR>", { desc = "Source file" })
 map("n", "<leader>q", "<cmd>q<CR>", { desc = "Exit" })
 map("n", "<leader><space>", "<C-^>", { desc = "Swap buffer" })
+
+-- Window Resizing
+vim.keymap.set("n", "<M-Right>", ":vertical resize +5<CR>", { silent = true })
+vim.keymap.set("n", "<M-Left>",  ":vertical resize -5<CR>", { silent = true })
+
+-- Reload config
+vim.keymap.set("n", "<M-r>", function()
+  vim.cmd("source $MYVIMRC")
+  print("Neovim config reloaded")
+end, { silent = true, desc = "Reload nvim config" })
