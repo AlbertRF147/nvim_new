@@ -1,4 +1,5 @@
 local map = vim.keymap.set
+local pr_review = require("../custom_plugins/pr_review")
 
 -- Escape shortcuts
 map("i", "jj", "<Esc>")
@@ -39,3 +40,25 @@ vim.keymap.set("n", "<M-r>", function()
   vim.cmd("source $MYVIMRC")
   print("Neovim config reloaded")
 end, { silent = true, desc = "Reload nvim config" })
+
+-- PR Review Keymaps --------------------------------------------------
+vim.keymap.set("n", "<leader>pr", function()
+  pr_review.pick_base_and_open_tree()
+end, { desc = "PR review: pick base + open tree" })
+
+vim.keymap.set("n", "<leader>pb", function()
+  pr_review.change_base()
+end, { desc = "PR review: change base" })
+
+vim.keymap.set("n", "<leader>pR", function()
+  pr_review.refresh()
+end, { desc = "PR review: refresh tree" })
+
+vim.keymap.set("n", "]h", function()
+  require("gitsigns").nav_hunk("next")
+end, { desc = "Next hunk" })
+
+vim.keymap.set("n", "[h", function()
+  require("gitsigns").nav_hunk("prev")
+end, { desc = "Prev hunk" })
+------------------------------------------------------------------------

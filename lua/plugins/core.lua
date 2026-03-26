@@ -55,7 +55,31 @@ return {
 		},
 	},
 
-	{ "lewis6991/gitsigns.nvim" },
+	{
+		"lewis6991/gitsigns.nvim",
+		opts = {
+			on_attach = function(bufnr)
+				local gs = require("gitsigns")
+
+				local base = vim.g.pr_review_active and vim.g.pr_review_base or nil
+				if not base or base == "" then
+					return
+				end
+
+				vim.schedule(function()
+					if not vim.api.nvim_buf_is_valid(bufnr) then
+						return
+					end
+					if vim.api.nvim_get_current_buf() ~= bufnr then
+						return
+					end
+
+					gs.change_base(base)
+					gs.refresh()
+				end)
+			end,
+		},
+	},
 
 	{
 		"sindrets/diffview.nvim",
