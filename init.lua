@@ -24,9 +24,12 @@ require("lazy").setup({
   checker = { enabled = true }, -- automatically check for plugin updates
 })
 
--- 3. Load basic settings (create these files next)
-require("config.options")
-require("config.keymaps")
-require("config.autocmds")
-require("config.diagnostics")
-require("config.colors")
+-- 3. Auto-load all config files
+local config_path = vim.fn.stdpath("config") .. "/lua/config"
+local config_files = vim.fn.readdir(config_path)
+
+for _, file in ipairs(config_files) do
+  if file:match("%.lua$") then
+    require("config." .. file:gsub("%.lua$", ""))
+  end
+end
