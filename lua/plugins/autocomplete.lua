@@ -8,6 +8,16 @@ return {
 				["<Up>"] = { "select_prev", "fallback" },
 				["<Down>"] = { "select_next", "fallback" },
 				["<Right>"] = { "select_and_accept", "fallback" },
+				["<Tab>"] = {
+					function()
+						if require("copilot.suggestion").is_visible() then
+							require("copilot.suggestion").accept()
+							return true -- Handled! Don't insert a literal tab.
+						end
+					end,
+					"snippet_forward",
+					"fallback", -- If no suggestion and no snippet, insert a tab.
+				},
 			},
 			appearance = {
 				use_nvim_cmp_as_default = true,

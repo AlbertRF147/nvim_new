@@ -1,11 +1,6 @@
 local M = {}
 
-vim.api.nvim_set_hl(0, "PrTreeModified", { fg = "#e5c07b" })
-vim.api.nvim_set_hl(0, "PrTreeAdded", { fg = "#98c379" })
-vim.api.nvim_set_hl(0, "PrTreeDeleted", { fg = "#e06c75" })
-vim.api.nvim_set_hl(0, "PrTreeRenamed", { fg = "#56b6c2" })
-vim.api.nvim_set_hl(0, "PrTreeFile", { fg = "#abb2bf" })
-vim.api.nvim_set_hl(0, "PrTreeFolder", { fg = "#61afef" })
+local ns = vim.api.nvim_create_namespace("pr-review-tree")
 
 local state = {
 	base = nil,
@@ -208,19 +203,27 @@ local function ensure_tree_window()
 		return state.tree_win, state.tree_buf
 	end
 
-	vim.cmd("topleft vnew")
-	state.tree_win = vim.api.nvim_get_current_win()
-	state.tree_buf = vim.api.nvim_get_current_buf()
+	-- Check if buffer still exists (window closed but buffer alive)
+	if state.tree_buf and vim.api.nvim_buf_is_valid(state.tree_buf) then
+		-- Reopen window with existing buffer
+		vim.cmd("topleft vsplit")
+		state.tree_win = vim.api.nvim_get_current_win()
+		vim.api.nvim_win_set_buf(state.tree_win, state.tree_buf)
+	else
+		-- Create new buffer and window
+		vim.cmd("topleft vnew")
+		state.tree_win = vim.api.nvim_get_current_win()
+		state.tree_buf = vim.api.nvim_get_current_buf()
+
+		vim.bo[state.tree_buf].buftype = "nofile"
+		vim.bo[state.tree_buf].bufhidden = "hide"
+		vim.bo[state.tree_buf].swapfile = false
+		vim.bo[state.tree_buf].filetype = "prreviewtree"
+		vim.bo[state.tree_buf].modifiable = false
+		vim.bo[state.tree_buf].buflisted = false
+	end
 
 	vim.api.nvim_win_set_width(state.tree_win, 36)
-
-	vim.bo[state.tree_buf].buftype = "nofile"
-	vim.bo[state.tree_buf].bufhidden = "hide"
-	vim.bo[state.tree_buf].swapfile = false
-	vim.bo[state.tree_buf].filetype = "prreviewtree"
-	vim.bo[state.tree_buf].modifiable = false
-	vim.bo[state.tree_buf].buflisted = false
-
 	vim.wo[state.tree_win].number = false
 	vim.wo[state.tree_win].relativenumber = false
 	vim.wo[state.tree_win].signcolumn = "no"
@@ -246,10 +249,15 @@ local function apply_review_base(bufnr)
 			return
 		end
 
-		-- Run in the context of the opened buffer
 		vim.api.nvim_buf_call(bufnr, function()
-			gs.change_base(base)
+			gs.change_base(base, bufnr)
 			gs.refresh()
+
+			-- Auto-enable line highlights for PR review
+			vim.defer_fn(function()
+				pcall(vim.cmd, "Gitsigns toggle_linehl")
+				pcall(vim.cmd, "Gitsigns toggle_numhl")
+			end, 150)
 		end)
 	end, 80)
 end
@@ -286,18 +294,24 @@ local function open_file_from_tree()
 end
 
 local function render_tree()
-    local _, buf = ensure_tree_window()
-    local tree = build_tree(state.files)
+	local _, buf = ensure_tree_window()
+	local tree = build_tree(state.files)
 	local lines, highlights, line_map = flatten_tree(tree)
 
 	vim.bo[buf].modifiable = true
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.bo[buf].modifiable = false
-	vim.api.nvim_buf_set_name(buf, "PR Review Tree")
+
+	-- Only set name if it's not already set to avoid E95 error
+	if vim.api.nvim_buf_get_name(buf) == "" then
+		vim.api.nvim_buf_set_name(buf, "PR Review Tree")
+	end
 
 	-- apply highlights
+	vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+
 	for _, h in ipairs(highlights) do
-		vim.api.nvim_buf_add_highlight(buf, -1, h.hl, h.line, 0, -1)
+		vim.api.nvim_buf_add_highlight(buf, ns, h.hl, h.line, 0, -1)
 	end
 
 	vim.b[buf].line_map = line_map

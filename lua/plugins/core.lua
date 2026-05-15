@@ -12,6 +12,9 @@ return {
 			blink_cmp = {
 				style = "bordered",
 			},
+			integrations = {
+				gitsigns = true,
+			},
 		},
 		config = function()
 			vim.cmd.colorscheme("catppuccin-mocha")
@@ -62,21 +65,16 @@ return {
 				local gs = require("gitsigns")
 
 				local base = vim.g.pr_review_active and vim.g.pr_review_base or nil
-				if not base or base == "" then
-					return
+				if base and base ~= "" then
+					vim.schedule(function()
+						if not vim.api.nvim_buf_is_valid(bufnr) then
+							return
+						end
+
+						gs.change_base(base, bufnr)
+						gs.refresh()
+					end)
 				end
-
-				vim.schedule(function()
-					if not vim.api.nvim_buf_is_valid(bufnr) then
-						return
-					end
-					if vim.api.nvim_get_current_buf() ~= bufnr then
-						return
-					end
-
-					gs.change_base(base)
-					gs.refresh()
-				end)
 			end,
 		},
 	},
