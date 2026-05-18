@@ -97,4 +97,67 @@ return {
 			})
 		end,
 	},
+
+	{
+		"folke/noice.nvim",
+		event = "VeryLazy",
+		dependencies = {
+			-- Noice requires these to render the UI and notifications properly
+			"MunifTanjim/nui.nvim",
+			"rcarriga/nvim-notify",
+		},
+		opts = {
+			lsp = {
+				-- Override markdown rendering so LSP docs look beautiful inside Noice
+				override = {
+					["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+					["vim.lsp.util.stylize_markdown"] = true,
+					["cmp.entry.get_documentation"] = true,
+				},
+				-- Disable the intrusive "hover" documentation change if you prefer standard LSP hover
+				hover = { enabled = false },
+				signature = { enabled = false },
+			},
+			presets = {
+				bottom_search = true, -- Places the search count/search bar at the bottom instead of a giant center popup
+				command_palette = true, -- Positions the command line (:) as a sleek popup in the upper center
+				long_message_to_split = true, -- Sends massive messages (like stack traces) into a regular split buffer instead of a popup
+				inc_rename = false, -- Set to true if you use the 'smjonas/inc-rename.nvim' plugin
+			},
+			routes = {
+				-- SEEDING SANITY: Silence the annoying "written" notifications every time you save a file (:w)
+				{
+					filter = {
+						event = "msg_show",
+						kind = "",
+						find = "written",
+					},
+					opts = { skip = true },
+				},
+				-- Silence LSP background progress notifications if they clutter your screen
+				{
+					filter = {
+						event = "lsp",
+						kind = "progress",
+					},
+					opts = { skip = true },
+				},
+			},
+            views = {
+                cmdline_popup = {
+                    position = {
+                        row = "40%",
+                        col = "50%",
+                    },
+                    size = {
+                        width = 60,
+                        height = "auto",
+                    },
+                },
+            },
+		},
+		config = function(_, opts)
+			require("noice").setup(opts)
+		end,
+	},
 }
