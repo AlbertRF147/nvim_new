@@ -5,21 +5,56 @@ return {
 
 	-- Colorscheme (Modern and Professional)
 	{
-		"catppuccin/nvim",
-		name = "catppuccin",
-		priority = 1000,
-		opts = {
-			blink_cmp = {
-				style = "bordered",
-			},
-			integrations = {
-				gitsigns = true,
-			},
-		},
+		"marko-cerovac/material.nvim",
 		config = function()
-			vim.cmd.colorscheme("catppuccin-mocha")
+			vim.g.material_style = "darker"
+			require("material").setup({
+				contrast = {
+					sidebars = true,
+					floating_windows = true,
+					line_numbers = true,
+					sign_column = true,
+					-- cursor_line = true,
+					non_current_windows = true,
+					lsp_virtual_text = true,
+				},
+				custom_highlights = {
+					-- Override the snacks picker active line behavior
+					SnacksPickerListCursorLine = {
+						bg = "#2e3c43", -- Match it to your material dark aesthetics
+						fg = "#ffffff", -- Keep text legible
+						bold = true,
+					},
+					-- Optional: If you use the snacks file explorer, it also relies on this:
+					SnacksExplorerRowActive = {
+						bg = "#2e3c43",
+						fg = "#ffffff",
+						bold = true,
+					},
+					-- Make the borders pop with a distinct color (e.g., Material Cyan/Blue)
+					SnacksPickerBorder = { fg = "#80cbc4" }, -- Main picker border
+					SnacksPickerInputBorder = { fg = "#80cbc4" }, -- Input/search bar border
+				},
+			})
+			vim.cmd("colorscheme material")
 		end,
 	},
+	-- {
+	-- 	"catppuccin/nvim",
+	-- 	name = "catppuccin",
+	-- 	priority = 1000,
+	-- 	opts = {
+	-- 		blink_cmp = {
+	-- 			style = "bordered",
+	-- 		},
+	-- 		integrations = {
+	-- 			gitsigns = true,
+	-- 		},
+	-- 	},
+	-- 	config = function()
+	-- 		vim.cmd.colorscheme("catppuccin-mocha")
+	-- 	end,
+	-- },
 
 	{
 		"folke/which-key.nvim",
@@ -45,7 +80,9 @@ return {
 			input = { enabled = true },
 			notifier = { enabled = true },
 			scope = { enabled = true },
-			lazygit = { enabled = true },
+			lazygit = {
+				enabled = true,
+			},
 		},
 		keys = {
 			{
