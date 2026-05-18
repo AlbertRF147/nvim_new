@@ -1,3 +1,22 @@
+local treesitter_parsers = {
+	"javascript",
+	"typescript",
+	"c",
+	"lua",
+	"rust",
+	"python",
+	"embedded_template",
+	"c_sharp",
+	"markdown",
+	"markdown_inline",
+	"sql",
+	"toml",
+	"yaml",
+	"json",
+	"css",
+	"html",
+}
+
 return {
 	{
 		"nvim-mini/mini.pairs",
@@ -41,15 +60,26 @@ return {
 			return {
 				n_lines = 500,
 				custom_textobjects = {
-					o = ai.gen_spec.treesitter({ -- code block
+					g = function() -- 'g' for entire buffer/global
+						local from = { line = 1, col = 1 }
+						local to = { line = vim.fn.line("$"), col = math.max(vim.fn.getline("$"):len(), 1) }
+						return { from = from, to = to }
+					end,
+					-- o: Target code blocks, loops, or conditionals
+					o = ai.gen_spec.treesitter({
 						a = { "@block.outer", "@conditional.outer", "@loop.outer" },
 						i = { "@block.inner", "@conditional.inner", "@loop.inner" },
 					}),
-					f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }), -- function
-					c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }), -- class
-					t = { "<([%p%w]-)%f[^<%w][^<>]->.-</%1>", "^<.->().*()</[^/]->$" }, -- tags
-					d = { "%f[%d]%d+" }, -- digits
-					e = { -- Word with case
+					-- f: Target entire functions
+					f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+					-- c: Target entire classes
+					c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }),
+					-- t: HTML/XML tags
+					t = { "<([%p%w]-)%f[^<%w][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+					-- d: Digits / Numbers
+					d = { "%f[%d]%d+" },
+					-- e: Sub-words (perfect for camelCase or snake_case editing)
+					e = {
 						{
 							"%u[%l%d]+%f[^%l%d]",
 							"%f[%S][%l%d]+%f[^%l%d]",
@@ -58,35 +88,41 @@ return {
 						},
 						"^().*()$",
 					},
-					u = ai.gen_spec.function_call(), -- u for "Usage"
-					U = ai.gen_spec.function_call({ name_pattern = "[%w_]" }), -- without dot in function name
+					-- u/U: Smart function calls (e.g., ciu to change arguments)
+					u = ai.gen_spec.function_call(),
+					U = ai.gen_spec.function_call({ name_pattern = "[%w_]" }),
 				},
 			}
 		end,
 		config = function(_, opts)
-			require("mini.ai").setup(opts)
+			-- Safely catch any initialization edge-cases
+			local status_ok, mini_ai = pcall(require, "mini.ai")
+			if status_ok then
+				mini_ai.setup(opts)
+			end
 		end,
 	},
 
 	{
 		"nvim-treesitter/nvim-treesitter",
 		lazy = false,
-		build = ":TSUpdate",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter-textobjects",
+		},
+		build = function()
+			require("nvim-treesitter").install(treesitter_parsers)
+		end,
 		config = function()
-			require("nvim-treesitter").setup({
-				ensure_installed = {
-					"javascript",
-					"typescript",
-					"c",
-					"lua",
-					"rust",
-					"python",
-					"embedded_template",
-					"c_sharp",
-					"markdown",
-					"markdown_inline",
-                    "sql",
-				},
+			require("nvim-treesitter").install(treesitter_parsers)
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = treesitter_parsers,
+				callback = function()
+					vim.treesitter.start()
+					vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+					vim.wo.foldmethod = "expr"
+					vim.wo.foldenable = false
+					vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+				end,
 			})
 		end,
 	},
@@ -154,7 +190,7 @@ return {
 					yaml = { "yamlfix" },
 					json = { "prettierd", "prettier", stop_after_first = true },
 					css = { "prettierd", "prettier", stop_after_first = true },
-                    sql = { "pg_format" },
+					sql = { "pg_format" },
 					-- Use "-" to disable formatting for specific filetypes
 					-- markdown = { "-" },
 				},
@@ -167,6 +203,29 @@ return {
 					},
 				},
 			})
+		end,
+	},
+
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		config = function()
+			require("treesitter-context").setup({
+				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+				multiwindow = false, -- Enable multiwindow support.
+				max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+				line_numbers = true,
+				multiline_threshold = 20, -- Maximum number of lines to show for a single context
+				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+				mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
+				-- Separator between context and content. Should be a single character string, like '-'.
+				-- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+				separator = "=",
+				zindex = 20, -- The Z-index of the context window
+				on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+			})
+			vim.api.nvim_set_hl(0, "TreesitterContext", { bg = "#000000" }) -- Distinct dark slate bg
+			-- vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "#ff007c" }) -- Hot pink separator line
 		end,
 	},
 }
